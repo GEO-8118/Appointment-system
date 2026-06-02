@@ -13,20 +13,24 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Generate Administrators Profile Account
-        User::create([
-            'name' => 'System Administrator',
-            'email' => 'admin@booking.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
+       User::firstOrCreate(
+    ['email' => 'admin@booking.com'],
+    [
+        'name' => 'System Administrator',
+        'password' => Hash::make('admin123'),
+        'role' => 'admin',
+    ]
+);
 
         // Generate Regular Customer Account
-        User::create([
-            'name' => 'Jane Doe',
-            'email' => 'customer@booking.com',
-            'password' => Hash::make('customer123'),
-            'role' => 'customer',
-        ]);
+       User::firstOrCreate(
+    ['email' => 'customer@booking.com'],
+    [
+        'name' => 'Jane Doe',
+        'password' => Hash::make('customer123'),
+        'role' => 'customer',
+    ]
+);
 
         // Mock Testing Service Options
         Service::create([
