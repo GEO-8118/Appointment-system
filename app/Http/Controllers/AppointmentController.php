@@ -18,7 +18,9 @@ class AppointmentController extends Controller
                 ->latest()
                 ->get();
 
-            return view('admin.dashboard', compact('appointments'));
+            $services = Service::all();
+
+            return view('admin.dashboard', compact('appointments', 'services'));
         }
 
         $appointments = Appointment::where('user_id', $user->id)
@@ -76,7 +78,6 @@ class AppointmentController extends Controller
         ]);
 
         $serviceIds = $request->input('service_ids');
-
         $scheduleId = $request->input('schedule_id');
 
         if (!$scheduleId) {
@@ -172,19 +173,67 @@ class AppointmentController extends Controller
 
         foreach ($lines as $line) {
 
-            $parts = explode('|', $line);
+            preg_match('/^(.*?)\s*-\s*\$(\d+(?:\.\d+)?)$/', trim($line), $matches);
 
-            Service::create([
-                'name' => $parts[0] ?? '',
-                'description' => $parts[1] ?? '',
-                'duration_minutes' => intval($parts[2] ?? 0),
-                'price' => floatval($parts[3] ?? 0)
-            ]);
+            if ($matches) {
+
+                Service::create([
+                    'name' => trim($matches[1]),
+                    'description' => '',
+                    'duration_minutes' => 60,
+                    'price' => floatval($matches[2])
+                ]);
+            }
         }
 
         return back()->with(
             'success',
             'Services imported successfully.'
         );
+    }
+
+    public function storeService(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'duration_minutes' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0'
+        ]);
+
+        Service::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'duration_minutes' => $request->duration_minutes,
+            'price' => $request->price
+        ]);
+
+        return back()->with('success', 'Service added successfully.');
+    }
+
+    public function updateService(Request $request, Service $service)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'duration_minutes' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0'
+        ]);
+
+        $service->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'duration_minutes' => $request->duration_minutes,
+            'price' => $request->price
+        ]);
+
+        return back()->with('success', 'Service updated successfully.');
+    }
+
+    public function destroyService(Service $service)
+    {
+        $service->delete();
+
+        return back()->with('success', 'Service deleted successfully.');
     }
 }

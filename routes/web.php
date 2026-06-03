@@ -34,4 +34,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/appointments/export/json', [AppointmentController::class, 'exportJson'])->name('reports.exportJson');
     Route::post('/services/import/csv', [AppointmentController::class, 'importCsv'])->name('services.importCsv');
+
+    Route::post('/admin/services', [AppointmentController::class, 'storeService'])
+    ->name('services.store');
+
+    Route::put('/admin/services/{service}', [AppointmentController::class, 'updateService'])
+    ->name('services.update');
+
+    Route::delete('/admin/services/{service}', [AppointmentController::class, 'destroyService'])
+    ->name('services.destroy');     
 });
